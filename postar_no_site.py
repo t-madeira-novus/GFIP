@@ -2,7 +2,7 @@ import pyautogui
 import pyperclip
 import os
 import time
-import shutil
+# import shutil
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait as Wait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 
 
 def _esperar(segundos):
@@ -60,8 +60,8 @@ def _postar_no_site(empresa, mes, ano, dictionary, app):
     login = "thiagomadeira.novus"
     password = "novus123"
 
-    browser = webdriver.Chrome(executable_path="P:\documentos\OneDrive - Novus Contabilidade\Doc Compartilhado"
-                                               "\Sistemas Internos\chromedriver.exe")
+    browser = webdriver.Chrome(executable_path="P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado"
+                                               "/Sistemas Internos/chromedriver.exe")
 
     browser.get('https://novuscontabilidade.com.br/')
     browser.maximize_window()
@@ -114,8 +114,8 @@ def _postar_no_site(empresa, mes, ano, dictionary, app):
     _clicar_pela_imagem("imgs/site_escolher_arquivo.png")
     _clicar_pela_imagem("imgs/site_nome.png")
 
-    path = "P:\documentos\OneDrive - Novus Contabilidade\Doc Compartilhado\Pessoal\Relatórios Sefip"
-    origem = path + "\\" + str(empresa) + "-" + str(dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
+    path = "P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado/Pessoal/Relatórios Sefip"
+    origem = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
     arquivo = _pegar_ultimo_arquivo_modificado(origem)
     pyperclip.copy(arquivo)
     pyautogui.hotkey('ctrl', 'v')
@@ -152,15 +152,15 @@ def _postar_no_site(empresa, mes, ano, dictionary, app):
     print(nome_empresa)
 
 
-time.sleep(2)
-dictionary = {}
-empresas = [11]
-path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
-for x in os.listdir(path):
-    for i in range (0, len(empresas)):
-        if "-" in str(x) and str(empresas[i]) == str(x)[:str(x).find("-")]:
-            dictionary[empresas[i]] = str(x)[str(x).find("-")+1:]
-print (dictionary)
-_postar_no_site(11, "08", "2020", dictionary, "hehe")
-
+# time.sleep(2)
+# dictionary = {}
+# empresas = [11]
+# path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
+# for x in os.listdir(path):
+#     for i in range (0, len(empresas)):
+#         if "-" in str(x) and str(empresas[i]) == str(x)[:str(x).find("-")]:
+#             dictionary[empresas[i]] = str(x)[str(x).find("-")+1:]
+# print (dictionary)
+# _postar_no_site(11, "08", "2020", dictionary, "hehe")
+#
 

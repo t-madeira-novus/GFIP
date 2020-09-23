@@ -5,9 +5,9 @@ import time
 import shutil
 
 from shutil import Error
-from pywinauto.application import Application
-from pywinauto.findwindows import ElementNotFoundError
-from pywinauto.findbestmatch import MatchError
+# from pywinauto.application import Application
+# from pywinauto.findwindows import ElementNotFoundError
+# from pywinauto.findbestmatch import MatchError
 
 
 def _clicar_pela_imagem (imagem):
@@ -87,33 +87,48 @@ def _salvar_relatorios(empresa, mes, ano, dictionary, app):
     #     dlg = application.window(best_match='SEFIP - Consulta Movimento')
     #     dlg.set_focus()
 
+    # Clickar na janela da Sefip
+    pyautogui.hotkey('winleft', 'd')
+    aux = _clicar_pela_imagem("imgs/icone_sefip_2.png")
+    if not aux:
+        aux = _clicar_pela_imagem("imgs/icone_sefip.png")
+    if not aux:
+        pyautogui.alert(text='O programa Sefip da Caixa não foi encontrado. Certifique-se de que ele esteja '
+                             'aberto. Se estiver, chame Thiago Madeira para solucionar '
+                             'este mistério misterioso.', title='Sefip não encontrado', button='OK')
+        return False
+
     pyautogui.press('esc', presses=5, interval=1)
 
     # Salvar arquivos
     # Analitico GRF
+    # pyautogui.hotkey('alt', 'r')
+    # pyautogui.press('down')
+    # pyautogui.press('right')
+    # pyautogui.press('enter')
+    #
+    # time.sleep(1)
+    # _clicar_pela_imagem("imgs\gerar.png")
+    # pyautogui.press('enter')
+    # _clicar_pela_imagem("imgs\ok_4.png")
+    # pyautogui.press('enter')
+    # time.sleep(1)
+    #
+    # pasta_caixa_path = 'C:\Program Files (x86)\CAIXA\SEFIP'#"E:\\Users\\"+os.getlogin()+"\\C\\CAIXA\\SEFIP"
+    # origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)
+    # destino = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
+    # try:
+    #     shutil.move(origem, destino)
+    # except Error:
+    #     pass
+    #
+    # pyautogui.hotkey('alt', 'f')
+
+    # Comprovante de Declaração à Previdência
+
     pyautogui.hotkey('alt', 'r')
     pyautogui.press('down')
     pyautogui.press('right')
-    pyautogui.press('enter')
-
-    time.sleep(1)
-    _clicar_pela_imagem("imgs\gerar.png")
-    pyautogui.press('enter')
-    _clicar_pela_imagem("imgs\ok_4.png")
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    pasta_caixa_path = 'C:\Program Files (x86)\CAIXA\SEFIP'#"E:\\Users\\"+os.getlogin()+"\\C\\CAIXA\\SEFIP"
-    origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)
-    destino = path + "\\" + str(empresa) + "-" + str(dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
-    try:
-        shutil.move(origem, destino)
-    except Error:
-        pass
-
-    pyautogui.hotkey('alt', 'f')
-
-    # Comprovante de Declaração à Previdência
     time.sleep(2)
     _clicar_pela_imagem("imgs/comprovante_declaracao.png")
     pyautogui.hotkey('alt', 'g')
@@ -124,7 +139,9 @@ def _salvar_relatorios(empresa, mes, ano, dictionary, app):
     pyautogui.press('enter')
     time.sleep(1)
 
-    origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)
+    pasta_caixa_path = 'E:\\Users\\thiago.madeira\\C\\SEFIP'
+    origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)  # ("E:\\Users\\"+os.getlogin()+"\\C\\CAIXA\\SEFIP")
+    destino = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
     try:
         shutil.move(origem, destino)
     except Error:

@@ -3,18 +3,24 @@ import pyautogui
 import os
 import time
 
-def _clicar_pela_imagem (imagem):
-    confidence = 0.95
+def _clicar_pela_imagem(imagem, offsetX=0, offsetY=0, tentativas=10, right=False):
+    #print("Procurando: ", imagem)
+    conf = 0.95
     aux = None
-    tentativas = 0
-    while aux == None and tentativas <= 10:
-        aux = pyautogui.locateCenterOnScreen(imagem, confidence=confidence)
-        if aux != None:
-            pyautogui.click(aux)
+    c = 0
+    while aux is None and c <= tentativas:
+        aux = pyautogui.locateCenterOnScreen(imagem, confidence=conf)
+        if aux is not None:
+            x = aux[0] + offsetX
+            y = aux[1] + offsetY
+            if right:
+                pyautogui.rightClick(x, y)
+            else:
+                pyautogui.click(x, y)
             return True
-        print("Procurando: ", imagem)
+        conf -= 0.01
         time.sleep(1)
-        tentativas += 1
+        c += 1
 
     return False
 
@@ -32,6 +38,7 @@ def _limpar_campo(X, Y):
 def _gerar_selos(empresa, mes, ano, dictionary, app):
     confidence = 0.95
     path = "P:\documentos\OneDrive - Novus Contabilidade\Doc Compartilhado\Pessoal\Relatórios Sefip"
+    path_aux = ""
 
     # Clickar na janela da Damínio
     aux = _clicar_pela_imagem("imgs/dominio_folha_icon.png")
@@ -44,7 +51,7 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
         return False
 
     try:
-        path_aux = path + "\\" + str(empresa) + "-" + str(dictionary[empresa]) + "\\" + str(ano) + "\\" + str(mes) + "." + str(
+        path_aux = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + str(ano) + "/" + str(mes) + "." + str(
             ano)
     except KeyError:
         file = open("relatorio_gfips_" + mes + "-" + ano + ".txt", "a+")
@@ -56,6 +63,10 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
 
     try:
         os.mkdir(path_aux)
+    except FileNotFoundError:
+        path_aux = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + str(ano)
+        os.mkdir(path_aux)
+        path_aux += "/" + str(mes) + "." + str(ano)
     except FileExistsError:
         pass
 
@@ -63,7 +74,9 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
     pyautogui.press('f8') # Abrir busca de empresas
     pyautogui.typewrite(str(empresa)) # Digitar id da empresa
     pyautogui.press('enter')
-    time.sleep(10) # Esperar empresa carregar
+
+    while _clicar_pela_imagem("imgs/troca_empresa.png", tentativas=1):
+        pass
 
     if _clicar_pela_imagem("imgs/relatorios.png") is False:
         file = open("relatorio_gfips_" + mes + "-" + ano + ".txt", "a+")
@@ -96,6 +109,10 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
     pyperclip.copy(path_aux)
     pyautogui.hotkey("ctrl", "v")
 
+    # Trocar modalidade
+    _clicar_pela_imagem('imgs/modalidade.png', offsetX=200)
+    _clicar_pela_imagem('imgs/modalidade_1.png')
+
     if empresa in [13, 879, 297, 312, 417, 800]:
 
         if _clicar_pela_imagem("imgs/codigo_reconhecimento.png") is False:
@@ -105,6 +122,20 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
             return False
 
         if _clicar_pela_imagem("imgs/mao_obra.png") is False:
+            file = open("relatorio_gfips_" + mes + "-" + ano + ".txt", "a+")
+            file.write(str(empresa) + "-" + dictionary[empresa] + ": Deu pau na hora de clicar em Mão de Obra\n")
+            file.close()
+            return False
+
+    elif empresa in [312, 417]:
+
+        if _clicar_pela_imagem("imgs/codigo_reconhecimento.png") is False:
+            file = open("relatorio_gfips_" + mes + "-" + ano + ".txt", "a+")
+            file.write(str(empresa) + "-" + dictionary[empresa] + ": Deu pau na hora de clicar em Código de Reconhecimento\n")
+            file.close()
+            return False
+
+        if _clicar_pela_imagem("imgs/construcao_civil.png") is False:
             file = open("relatorio_gfips_" + mes + "-" + ano + ".txt", "a+")
             file.write(str(empresa) + "-" + dictionary[empresa] + ": Deu pau na hora de clicar em Mão de Obra\n")
             file.close()
@@ -133,3 +164,6 @@ def _gerar_selos(empresa, mes, ano, dictionary, app):
 
     return True
 
+
+# _clicar_pela_imagem('imgs/modalidade.png', offsetX=200)
+# _clicar_pela_imagem('imgs/modalidade_1.png')

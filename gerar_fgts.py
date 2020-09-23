@@ -39,8 +39,8 @@ def _gerar_fgts(empresa, mes, ano, dictionary, app):
     pyautogui.press('i')
 
 
-    path = "P:\documentos\OneDrive - Novus Contabilidade\Doc Compartilhado\Pessoal\Relatórios Sefip"
-    origem = path + "\\" + str(empresa) + "-" + str(dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
+    path = "P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado/Pessoal/Relatórios Sefip"
+    origem = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
     arquivo_xml = _pegar_arquivo(origem, ".xml")
 
     pyperclip.copy(arquivo_xml)
@@ -58,12 +58,12 @@ def _gerar_fgts(empresa, mes, ano, dictionary, app):
     pyautogui.press("f")
     time.sleep(1)
     pyautogui.press("esc", presses=2, interval=1)
-    pasta_caixa_path = 'C:\Program Files (x86)\CAIXA\SEFIP'
+    pasta_caixa_path = 'C:/Program Files (x86)/CAIXA/SEFIP'
     origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)
-    destino = path + "\\" + str(empresa) + "-" + str(dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
+    destino = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
     shutil.move(origem, destino)
 
-    return true
+    return True
 
 
 # time.sleep(2)

@@ -1,6 +1,6 @@
 import time
 import pyautogui
-import threading
+# import threading
 import os
 import pyperclip
 import shutil
@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import TimeoutException
+# from selenium.common.exceptions import TimeoutException
 
 
 def _pegar_ultimo_arquivo_modificado(search_dir):
@@ -77,11 +77,6 @@ def _transmitir_gfips(empresa, mes, ano, dictionary, app):
     # thread1.start()
 
     _clicar_pela_imagem("imgs/site_conectividade/caixa_postal.png")
-
-    path_busca = path + "\\" + str(empresa) + "-" + str(
-        dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
-
-    path_aux = _pegar_arquivo(path_busca, ".SFP")
     _clicar_pela_imagem("imgs/site_conectividade/nova_mensagem.png")
     _clicar_pela_imagem("imgs/site_conectividade/box.png")
     pyautogui.press('down')
@@ -107,6 +102,11 @@ def _transmitir_gfips(empresa, mes, ano, dictionary, app):
 
     pyautogui.press('enter')
     time.sleep(2)
+
+    path_busca = path + "\\" + str(empresa) + "-" + str(
+        dictionary[empresa]) + "\\" + ano + "\\" + mes + "." + ano
+
+    path_aux = _pegar_arquivo(path_busca, ".SFP")
     pyperclip.copy(path_aux)
     pyautogui.hotkey('ctrl', 'v')
     pyautogui.press("enter")
@@ -145,8 +145,8 @@ def _transmitir_gfips(empresa, mes, ano, dictionary, app):
 
     origem = _pegar_ultimo_arquivo_modificado("E:\\Users\\"+os.getlogin()+"\\Downloads")
     destino = path_busca
-    print(origem)
-    print(destino)
+    # print(origem)
+    # print(destino)
     try:
         shutil.move(origem, destino)
     except:
@@ -159,7 +159,7 @@ def _transmitir_gfips(empresa, mes, ano, dictionary, app):
     pyautogui.press('esc')
     pyautogui.hotkey('alt', 'f4')
 
-    origem = _pegar_ultimo_arquivo_modificado("E:\\Users\\"+os.getlogin()+"\\Downloads")
+    origem = _pegar_ultimo_arquivo_modificado("E:/Users/"+os.getlogin()+"/Downloads")
     destino = path_busca
     try:
         shutil.move(origem, destino)
@@ -167,12 +167,12 @@ def _transmitir_gfips(empresa, mes, ano, dictionary, app):
         pass
     browser.close()
 
-dictionary = {}
-path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
-empresas = [4]
-for x in os.listdir(path):
-    for i in range (0, len(empresas)):
-        if "-" in str(x) and str(empresas[i]) == str(x)[:str(x).find("-")]:
-            dictionary[empresas[i]] = str(x)[str(x).find("-")+1:]
+# dictionary = {}
+# path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
+# empresas = [4]
+# for x in os.listdir(path):
+#     for i in range (0, len(empresas)):
+#         if "-" in str(x) and str(empresas[i]) == str(x)[:str(x).find("-")]:
+#             dictionary[empresas[i]] = str(x)[str(x).find("-")+1:]
 
 # _gerar_sfps(4, "08", "2020", dictionary, "teste")
