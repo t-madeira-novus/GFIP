@@ -1,9 +1,11 @@
+import pyperclip
+import pywinauto
+
 from appJar import gui
-from comecar import _comecar
-import pandas as pd
+from comecar import start
 
 
-def _converte_mes(mes):
+def converte_mes(mes):
     if str(mes) == "Janeiro":
         return "01"
     elif str(mes) == "Fevereiro":
@@ -28,175 +30,96 @@ def _converte_mes(mes):
         return "11"
     elif str(mes) == "Dezembro":
         return "12"
+    elif str(mes) == "13º":
+        return "13"
 
 
-def _ajuda(submenu):
+
+def ajuda(submenu):
     aux = 'Este sistema é capaz de gerar as GFIPs das empresas passadas como parâmetro. É possível adicionar as ' \
           'empresas carregando uma planilha contendo seus ids na primeira coluna ou digitando uma a uma.'
     if submenu == 'Como usar':
         app.infoBox('Como usar', aux)
+
     elif submenu == 'Versão':
         app.infoBox('Versão', 'Versão 1.0')
 
 
-def thread_comecar():
+# def thread_comecar():
+#     global empresas
+#     ano = app.getOptionBox("Ano: ")
+#     mes = app.getOptionBox("Mês: ")
+#     if mes is not None and ano is not None:
+#         mes = converte_mes(mes)
+#         app.thread(comecar(empresas, mes, ano, app))
+#     else:
+#         app.infoBox("Erooou...", "Mês ou Ano não selecionado")
+
+def copy_link():
+    pyperclip.copy("https://docs.google.com/spreadsheets/d/1SFa0STOpjhB5b8Eqi92E40yDBCH9EFwqG_Mgv5gYdq0/")
+
+
+def thread_start():
     global empresas
     ano = app.getOptionBox("Ano: ")
     mes = app.getOptionBox("Mês: ")
     if mes is not None and ano is not None:
-        mes = _converte_mes(mes)
-        app.thread(_comecar(empresas, mes, ano, app))
+        mes = converte_mes(mes)
+        app.thread(start(mes, ano, app))
     else:
         app.infoBox("Erooou...", "Mês ou Ano não selecionado")
 
 
-def thread_gerar_selos():
-    global empresas
-    ano = app.getOptionBox("Ano: ")
-    mes = app.getOptionBox("Mês: ")
-    if mes is not None and ano is not None:
-        mes = _converte_mes(mes)
-        app.thread(_gerar_selos(empresas, mes, ano, app))
-    else:
-        app.infoBox("Erooou...", "Mês ou Ano não selecionado")
+def start_dominio():
+    app = pywinauto.Application(backend='win32').start("C:\\Contabil\\contabil.exe \\folha")
+    login = app.window(title_re='.*Conectando*.')
+    login['Nome do Usuario:Edit2'].set_text("novus123")
+    login['&OKButton'].click()
 
-
-def thread_gerar_sfps():
-    global empresas
-    ano = app.getOptionBox("Ano: ")
-    mes = app.getOptionBox("Mês: ")
-    if mes is not None and ano is not None:
-        mes = _converte_mes(mes)
-        app.thread(_gerar_sfps(empresas, mes, ano, app))
-    else:
-        app.infoBox("Erooou...", "Mês ou Ano não selecionado")
-
-
-def thread_salvar_relatorios_gfips():
-    global empresas
-    ano = app.getOptionBox("Ano: ")
-    mes = app.getOptionBox("Mês: ")
-    if mes is not None and ano is not None:
-        mes = _converte_mes(mes)
-        app.thread(_salvar_relatorios(empresas, mes, ano, app))
-    else:
-        app.infoBox("Erooou...", "Mês ou Ano não selecionado")
-
-
-def thread_transmitir_gfips():
-    global empresas
-    ano = app.getOptionBox("Ano: ")
-    mes = app.getOptionBox("Mês: ")
-    if mes is not None and ano is not None:
-        mes = _converte_mes(mes)
-        app.thread(_transmitir_gfips(empresas, mes, ano, app))
-    else:
-        app.infoBox("Erooou...", "Mês ou Ano não selecionado")
-
-
-def thread_add_empresa():
-    app.thread(_add_empresa())
-
-
-def _add_empresa():
-    global empresas
-    try:
-        empresas.append(int(app.getEntry("empresa")))
-        app.updateListBox("lista_empresas", empresas, select=False, callFunction=False)
-
-    except ValueError:
-        if app.getEntry("empresa") == "":
-            app.infoBox("Erooou...", "Você está tentando inserir uma empresa sem digitar o ID dela antes!")
-        else:
-            app.infoBox("Erooou...", app.getEntry("empresa") + " não é uma empresa válida.")
-
-
-def thread_remove_empresa():
-    app.thread(_remove_empresa())
-
-
-def _remove_empresa():
-    global empresas
-    try:
-        aux = int(app.getEntry("empresa"))
-        try:
-            empresas.remove(aux)
-            app.updateListBox("lista_empresas", empresas, select=False, callFunction=False)
-        except ValueError:
-            app.infoBox("Erooou...", app.getEntry("empresa") + " não está na lista.")
-
-    except ValueError:
-        if app.getEntry("empresa") == "":
-            app.infoBox("Erooou...", "Você está tentando remover uma empresa sem digitar o ID dela antes!")
-        else:
-            app.infoBox("Erooou...", app.getEntry("empresa") + " não é uma empresa válida.")
-
-
-def thread_carregar_empresas():
-    app.thread(_carregar_empresas())
-
-
-def _carregar_empresas():
-    global empresas
-    path = app.openBox(title=None, dirName=None, fileTypes=None, asFile=False, parent=None, multiple=False, mode='r')
-
-    df = pd.read_csv(path, encoding="latin1", sep=";")
-    primeira_coluna = df.columns[0]
-    empresas = df[primeira_coluna].tolist()
-    app.updateListBox("lista_empresas", df[primeira_coluna], select=False, callFunction=False)
-
+def start_sefip():
+    pywinauto.Application(backend='win32').start("E:\\Users\\thiago.madeira\\C\\SEFIP\\Sefip.exe")
 
 # Variaveis globais
 empresas = []
 
 # Criando a interface Gráfica
 app = gui("gFIP-FIP")
+app.setResizable(canResize=True)
+app.setLocation("CENTER")
+app.setStretch("both")
+app.setSticky("nesw")
 app.setFont(10)
-app.addMenuList("Ajuda", ["Como usar", "Versão"], _ajuda)
+app.setSize(500, 200)
+app.setIcon("logo.gif")
+app.addMenuList("Ajuda", ["Como usar", "Versão"], ajuda)
 
 #######################################################################################################################
 coluna = 0
 linha = 0
 
+# app.addLabel("spreadsheet_link", "https://docs.google.com/spreadsheets/d/1SFa0STOpjhB5b8Eqi92E40yDBCH9EFwqG_Mgv5gYdq0/",
+#              row=linha, column=coluna)
+# linha += 1
 app.addLabelOptionBox("Mês: ", ["- Mês -", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 'Julho',
-                                "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],  row=linha, column=coluna)
+                                "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "13º"],  row=linha, column=coluna)
 linha += 1
-app.addLabelOptionBox("Ano: ", ["- Ano -", "2020", "2021"],  row=linha, column=coluna)
+app.addLabelOptionBox("Ano: ", ["- Ano -", "2021"],  row=linha, column=coluna)
 linha += 1
-app.addButton("Começar", thread_comecar, row=linha, column=coluna)
+app.addButton("Começar", thread_start, row=linha, column=coluna)
 linha += 1
-# app.addButton("Gerar .SFPs", thread_gerar_sfps, row=linha, column=coluna)
-# linha += 1
-# app.addButton("Transmitir GFIPs", thread_transmitir_gfips, row=linha, column=coluna)
-# linha += 1
-# app.addButton("Salvar Relatórios de GFIPs", thread_salvar_relatorios_gfips, row=linha, column=coluna)
-# linha += 1
-
 ########################################################################################################################
 coluna = 1
 linha = 0
 
-app.addLabel(str(linha)+"x"+str(coluna), "Lista de empresas", row=linha, column=coluna)
+app.addButton("Abrir Domínio", start_dominio, row=linha, column=coluna)
 linha += 1
-app.addListBox("lista_empresas", "", row=linha, column=coluna, colspan=0, rowspan=5)
-app.addListItems("lista_empresas", empresas)
+app.addButton("Abrir Sefip", start_sefip, row=linha, column=coluna)
 linha += 1
-
+app.addButton("Copiar link da planilha", copy_link, row=linha, column=coluna)
+linha += 1
 ########################################################################################################################
 coluna = 3
 linha = 0
-
-app.addLabel(str(linha)+"x"+str(coluna), "Digite uma empresa para adicionar ou remover", row=linha, column=coluna)
-linha += 1
-app.addEntry("empresa", row=linha, column=coluna)
-linha += 1
-app.addButton("Adicionar empresa", thread_add_empresa, row=linha, column=coluna)
-linha += 1
-app.addButton("Remover empresa", thread_remove_empresa, row=linha, column=coluna)
-linha += 1
-app.addButton("Carregar planilha com as empresas", thread_carregar_empresas, row=linha, column=coluna)
-linha += 1
-
 ########################################################################################################################
 # Inicializa a GUI
 app.go()

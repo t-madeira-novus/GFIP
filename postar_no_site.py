@@ -12,6 +12,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 # from selenium.webdriver.chrome.options import Options
 
+from funcoes import clicar_pela_imagem, cria_dicionario, clicar_pelo_xpath
+
 
 def _esperar(segundos):
     i = 0
@@ -34,122 +36,152 @@ def _pegar_ultimo_arquivo_modificado (search_dir):
     else:
         return files[-2]
 
-def _clicar_pela_imagem(imagem):
-    confidence = 0.95
-    aux = None
-    tentativas = 0
-    while aux == None and tentativas <= 10:
-        aux = pyautogui.locateCenterOnScreen(imagem, confidence=confidence)
-        if aux != None:
-            pyautogui.click(aux)
-            return True
-        print("Procurando: ", imagem)
-        time.sleep(1)
-        tentativas += 1
+def get_fgts_namefile (search_dir):
+    savedPath = os.getcwd()
+    os.chdir(search_dir)
+    files = filter(os.path.isfile, os.listdir(search_dir))
+    files = [os.path.join(search_dir, f) for f in files] # add path to each file
+    files.sort(key=lambda x: os.path.getmtime(x))
+    os.chdir(savedPath)
 
-    return False
+    for file in files:
+        file_aux = file.split('\\')[-1]
+        if str(file_aux) == "FGTS.pdf" or str(file_aux) == "FGTS.PDF":
+            return file_aux
+    for file in files:
+        file_aux = file.split('\\')[-1]
+        if str(file_aux[:3]) == "GRF":
+            return file_aux
 
-
-def _clicar_pelo_xpath(browser, xpath):
+def clicar_pelo_xpath(browser, xpath):
     time.sleep(1)
-    button = Wait(browser, 30).until(ec.presence_of_element_located((By.XPATH, xpath)))
+    button = Wait(browser, 10).until(ec.presence_of_element_located((By.XPATH, xpath)))
     ActionChains(browser).move_to_element(button).click(button).perform()
 
 
-def _postar_no_site(empresa, mes, ano, dictionary, app):
+def postar_no_site(empresa, mes, ano, dictionary):
     login = "thiagomadeira.novus"
     password = "novus123"
 
-    browser = webdriver.Chrome(executable_path="P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado"
-                                               "/Sistemas Internos/chromedriver.exe")
+    path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
+    origem = path + "\\" + str(empresa) + "-" + str(dictionary[empresa][0]) + "\\" + ano + "\\" + mes + "." + ano
+    try:
+        arquivo = origem+"\\"+get_fgts_namefile(origem)
+    except TypeError: # can only concatenate str (not "NoneType") to str // Não achou guia do fgts pra postar
+        return False
+    print ("Arquivo para postar: ", arquivo)
 
-    browser.get('https://novuscontabilidade.com.br/')
+    browser = webdriver.Chrome(executable_path="P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado"
+                                               "\\Sistemas Internos\\chromedriver.exe")
+
+    browser.get('https://novuscontabilidade.com.br/area-do-cliente/')
     browser.maximize_window()
-    _clicar_pelo_xpath(browser, "/html/body/div[1]/div/header/div/div/section[1]/div/div/div[2]/div/div/div/div/"
-                                "ul/li[3]/a/span[2]")
-
+    # clicar_pelo_xpath(browser, "/html/body/div[2]/div/header/div/div/section[1]/div/div/div[2]/div/div/div/div/ul/li[3]/a/span[2]")
+    # clicar_pela_imagem('imgs/area_cliente.png')
     browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/div/section/div/div/div[3]/div/div/div/div/"
                                   "div/form/div[1]/input").send_keys(login)
     browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/div/section/div/div/div[3]/div/div/div/div/"
                                   "div/form/div[2]/input").send_keys(password)
 
-    _clicar_pelo_xpath(browser, "/html/body/div[1]/div/main/div/div/div/section/div/div/div[3]/div/div/div/div/"
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/main/div/div/div/section/div/div/div[3]/div/div/div/div/"
                                 "div/form/div[3]/input")  # Acessar
-    _clicar_pelo_xpath(browser, "/html/body/div[2]/table/tbody/tr[2]/td/table/tbody/"
+    clicar_pelo_xpath(browser, "/html/body/div[2]/table/tbody/tr[2]/td/table/tbody/"
                                 "tr/td/div/ul/li[4]/a")  # Publicação de Documentos
-    _clicar_pelo_xpath(browser, "/html/body/div[2]/table/tbody/tr[2]/td/table/tbody/tr"
+    clicar_pelo_xpath(browser, "/html/body/div[2]/table/tbody/tr[2]/td/table/tbody/tr"
                                 "/td/div/ul/li[4]/ul/li[1]/a")  # Documentos
 
-    nome_empresa = dictionary[empresa]
+    nome_empresa = dictionary[empresa][0]
+
     select_clientes = Select(browser.find_element_by_id("publicacaoForm:cliente"))
 
     for cliente in select_clientes.options:
         if nome_empresa in str(cliente.text):
-            print ('ok')
             cliente.click()
             break
 
-
-    _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[2]/td[3]/input")
-
-    _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[3]/td[2]/div/select")
+    # pyautogui.keyUp('shift')
+    # pyautogui.keyUp('alt')
+    # pyautogui.keyUp('ctrl')
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[2]/td[3]/input")
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[3]/td[2]/div/select")
     pyautogui.typewrite("Pessoal")
     pyautogui.press("enter")
 
-    _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[4]/td[2]/div[1]/select")
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[4]/td[2]/div[1]/select")
     pyautogui.typewrite("/GFIP")
     pyautogui.press("enter")
 
-    _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[5]/td[2]/input")
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[1]/tbody/tr[5]/td[2]/input")
     pyautogui.typewrite(mes+'/'+ano)
 
 
-    _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[3]/tbody/tr/td/table/tbody/tr/td/input")  #Anexar documento
+    clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[3]/tbody/tr/td/table/tbody/tr/td/input")  #Anexar documento
+
+    clicar_pela_imagem('imgs\\nome_dominio.png')
 
     pyautogui.press('tab')
     pyautogui.typewrite(mes+'/'+ano)
-    pyautogui.press(['tab', 'tab', 'space'])
+    # pyautogui.press(['tab', 'tab', 'space'])
 
-    _clicar_pela_imagem("imgs/site_anexar_arquivo.png")
-    _clicar_pela_imagem("imgs/site_escolher_arquivo.png")
-    _clicar_pela_imagem("imgs/site_nome.png")
+    clicar_pela_imagem("imgs\\site_anexar_arquivo.png")
 
-    path = "P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado/Pessoal/Relatórios Sefip"
-    origem = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
-    arquivo = _pegar_ultimo_arquivo_modificado(origem)
+    clicar_pela_imagem("imgs\\site_escolher_arquivo.png")
+    time.sleep(1)
+    clicar_pela_imagem("imgs\\nome.png")
+
     pyperclip.copy(arquivo)
     pyautogui.hotkey('ctrl', 'v')
     pyautogui.press("enter")
 
-    _clicar_pela_imagem("imgs/site_anexar.png")
-    _esperar(3)
-    # _clicar_pela_imagem("imgs/site_anexar.png")
+    clicar_pela_imagem("imgs/site_anexar.png")
+    pyautogui.press(['tab', 'tab', 'space'])
+
+    time.sleep(7)
+
+    pyautogui.press(['tab', 'space'])
+    clicar_pela_imagem("imgs/gravar.png")
+    time.sleep(7)
+    clicar_pela_imagem("imgs/gravar.png")
+    clicar_pela_imagem("imgs/pop_up.png", offsetX=125, offsetY=35)
+    # clicar_pela_imagem("imgs/pop_up.png", offsetX=100, offsetY=40)
+
+    time.sleep(7)
+
+    try:
+        browser.close()
+    except:
+        time.sleep(5)
+        try:
+            browser.switch_to.alert.accept()
+        except:
+            pass
+        browser.close()
 
 
 
-    # _clicar_pela_imagem("imgs/flash.png")
-    # _clicar_pela_imagem("imgs/flash_bloqueado.png")
+    # clicar_pela_imagem("imgs/flash.png")
+    # clicar_pela_imagem("imgs/flash_bloqueado.png")
     #
     # pyautogui.press('tab', presses=3)
     # pyautogui.press('enter')
-    # _clicar_pela_imagem("imgs/switch.png")
+    # clicar_pela_imagem("imgs/switch.png")
     # pyautogui.hotkey("ctrl", 'w')
-    # _clicar_pela_imagem("imgs/flash.png")
+    # clicar_pela_imagem("imgs/flash.png")
     # time.sleep(1)
-    # _clicar_pela_imagem("imgs/permitir.png")
+    # clicar_pela_imagem("imgs/permitir.png")
     # time.sleep(3)
     #
-    #
-    # _clicar_pela_imagem("imgs/site_pessoal.png")
-    # _clicar_pela_imagem("imgs/site_expandir_todas.png")
+    #P:\documentos\OneDrive - Novus Contabilidade\Doc Compartilhado\Pessoal\Relatórios Sefip\761-BELEZA FEMININA\2020\11.2020\Sefip.re
+    # clicar_pela_imagem("imgs/site_pessoal.png")
+    # clicar_pela_imagem("imgs/site_expandir_todas.png")
 
 
 
-    time.sleep(60)
+    # time.sleep(60)
     #
     # try:
-    #     _clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[2]/tbody/tr/td[1]/div/p/a/img")
-    print(nome_empresa)
+    #     clicar_pelo_xpath(browser, "/html/body/div[3]/div/table/tbody/tr[1]/td/table/tbody/tr[3]/td/form/table[2]/tbody/tr/td[1]/div/p/a/img")
+    # print(nome_empresa)
 
 
 # time.sleep(2)
@@ -157,10 +189,12 @@ def _postar_no_site(empresa, mes, ano, dictionary, app):
 # empresas = [11]
 # path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
 # for x in os.listdir(path):
-#     for i in range (0, len(empresas)):
+#     for i in range (0, len(empresas)):664
 #         if "-" in str(x) and str(empresas[i]) == str(x)[:str(x).find("-")]:
 #             dictionary[empresas[i]] = str(x)[str(x).find("-")+1:]
 # print (dictionary)
-# _postar_no_site(11, "08", "2020", dictionary, "hehe")
-#
+
+
+
+# path = "P:\\documentos\\OneDrive - Novus Conta
 

@@ -3,7 +3,7 @@ import pyperclip
 import os
 import time
 import shutil
-
+from funcoes import clicar_pela_imagem
 
 def _pegar_ultimo_arquivo_modificado (search_dir):
     savedPath = os.getcwd()
@@ -33,15 +33,14 @@ def _pegar_arquivo(search_dir, string):
 
     return "Nao tem"
 
-def _gerar_fgts(empresa, mes, ano, dictionary, app):
-    pyautogui.hotkey('alt', 'r')
-    pyautogui.press('g')
-    pyautogui.press('i')
+def gerar_fgts(empresa, mes, ano, dictionary):
+    path = "P:\\documentos\\OneDrive - Novus Contabilidade\\Doc Compartilhado\\Pessoal\\Relatórios Sefip"
+    destino = path + "\\" + str(empresa) + "-" + str(dictionary[empresa][0]) + "\\" + ano + "\\" + mes + "." + ano
+    arquivo_xml = _pegar_arquivo(destino, ".xml")
 
-
-    path = "P:/documentos/OneDrive - Novus Contabilidade/Doc Compartilhado/Pessoal/Relatórios Sefip"
-    origem = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
-    arquivo_xml = _pegar_arquivo(origem, ".xml")
+    while clicar_pela_imagem('imgs/arquivo_icp.png', tentativas = 2) is False:
+        clicar_pela_imagem('imgs/relatorios_sefip.png', tentativas = 2)
+        clicar_pela_imagem('imgs/grf.png', tentativas = 2)
 
     pyperclip.copy(arquivo_xml)
     time.sleep(1)
@@ -56,12 +55,18 @@ def _gerar_fgts(empresa, mes, ano, dictionary, app):
     pyautogui.press("enter")
     time.sleep(1)
     pyautogui.press("f")
-    time.sleep(1)
+
     pyautogui.press("esc", presses=2, interval=1)
-    pasta_caixa_path = 'C:/Program Files (x86)/CAIXA/SEFIP'
+    pasta_caixa_path = 'E:\\Users\\thiago.madeira\\C\\SEFIP'
+    time.sleep(10)
     origem = _pegar_ultimo_arquivo_modificado(pasta_caixa_path)
-    destino = path + "/" + str(empresa) + "-" + str(dictionary[empresa]) + "/" + ano + "/" + mes + "." + ano
-    shutil.move(origem, destino)
+    print (origem)
+
+    try:
+        shutil.move(origem, destino)
+    except:
+        os.remove(origem)
+
 
     return True
 
